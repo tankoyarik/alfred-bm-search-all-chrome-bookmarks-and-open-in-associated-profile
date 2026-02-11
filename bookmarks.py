@@ -77,6 +77,7 @@ def profile_icon(profile_dir):
 
 def main():
     query = sys.argv[1].strip().lower() if len(sys.argv) > 1 else ""
+    keywords = query.split()
     profiles = get_profiles()
     usage = load_usage()
     items = []
@@ -84,7 +85,8 @@ def main():
     for pdir, pname in sorted(profiles.items()):
         icon = profile_icon(pdir)
         for bm in get_bookmarks(pdir):
-            if query and query not in bm["name"].lower():
+            name_lower = bm["name"].lower()
+            if keywords and not all(kw in name_lower for kw in keywords):
                 continue
             count = usage.get(bm["url"], 0)
             items.append({
