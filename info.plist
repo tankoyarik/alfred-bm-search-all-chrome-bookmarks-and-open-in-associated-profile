@@ -23,7 +23,7 @@
 		</array>
 	</dict>
 	<key>createdby</key>
-	<string>Claude</string>
+	<string>yaroslav.tonkovyd</string>
 	<key>description</key>
 	<string>Search Chrome bookmarks across all profiles and open in the correct profile</string>
 	<key>disabled</key>
