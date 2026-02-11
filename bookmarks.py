@@ -1,11 +1,27 @@
 #!/usr/bin/env python3
-"""Alfred Script Filter: Search Chrome bookmarks across all profiles."""
+"""Alfred Script Filter: Search Chrome bookmarks across all profiles.
+Sorts results by usage frequency (most opened first).
+"""
 import json
 import os
 import sys
 
 CHROME_DIR = os.path.expanduser("~/Library/Application Support/Google/Chrome")
 CHROME_ICON = "/Applications/Google Chrome.app/Contents/Resources/app.icns"
+DATA_DIR = os.path.expanduser(
+    "~/Library/Application Support/Alfred/Workflow Data/"
+    "com.custom.chrome-bookmarks-search"
+)
+USAGE_FILE = os.path.join(DATA_DIR, "usage.json")
+
+
+def load_usage():
+    """Load URL -> open count mapping."""
+    try:
+        with open(USAGE_FILE, "r") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
 
 
 def get_profiles():
@@ -62,6 +78,7 @@ def profile_icon(profile_dir):
 def main():
     query = sys.argv[1].strip().lower() if len(sys.argv) > 1 else ""
     profiles = get_profiles()
+    usage = load_usage()
     items = []
 
     for pdir, pname in sorted(profiles.items()):
@@ -69,6 +86,7 @@ def main():
         for bm in get_bookmarks(pdir):
             if query and query not in bm["name"].lower():
                 continue
+            count = usage.get(bm["url"], 0)
             items.append({
                 "title": bm["name"],
                 "subtitle": f"[{pname}]  {bm['folder']}",
@@ -82,7 +100,15 @@ def main():
                         "valid": True,
                     }
                 },
+                "_count": count,
             })
+
+    # Most used first, then alphabetical
+    items.sort(key=lambda x: (-x["_count"], x["title"].lower()))
+
+    # Strip internal field before output
+    for item in items:
+        del item["_count"]
 
     if not items:
         items.append({

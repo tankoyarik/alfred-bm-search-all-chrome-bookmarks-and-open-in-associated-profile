@@ -87,10 +87,7 @@
 				<key>escaping</key>
 				<integer>0</integer>
 				<key>script</key>
-				<string>arg="{query}"
-profile_dir="${arg%%|||*}"
-url="${arg#*|||}"
-open -na "Google Chrome" --args --profile-directory="$profile_dir" "$url"</string>
+				<string>/usr/bin/python3 open_bookmark.py "{query}"</string>
 				<key>scriptargtype</key>
 				<integer>0</integer>
 				<key>scriptfile</key>
