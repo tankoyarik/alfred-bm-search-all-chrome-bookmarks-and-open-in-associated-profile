@@ -1,15 +1,20 @@
 # Chrome Bookmarks Search — Alfred Workflow
 
-Search all Chrome bookmarks across every profile and open them in the correct profile.
-
 ![Alfred](https://img.shields.io/badge/Alfred-Workflow-blueviolet)
 
-## Features
+## The Problem
 
-- **Multi-profile support** — discovers all Chrome profiles automatically
-- **Profile icons** — shows the Google profile picture for each bookmark (falls back to Chrome icon)
-- **Profile-aware open** — bookmarks launch in the Chrome profile they belong to
-- **Fast filtering** — searches bookmark names as you type
+Alfred's built-in bookmark search (`bm`) only looks within a single Chrome profile. Worse, when you select a bookmark, it opens in whichever Chrome window happens to be in front — not the profile the bookmark belongs to. So if you're searching for a work bookmark but your personal Chrome window is active, it opens there instead. There's no profile awareness at all.
+
+If you use multiple Chrome profiles (work, personal, client projects, etc.), this makes the default bookmark search nearly useless.
+
+## The Solution
+
+This workflow fixes both issues:
+
+1. **Searches across all Chrome profiles** — every bookmark from every profile appears in one unified list, labeled with its profile name and icon
+2. **Opens in the correct profile** — selecting a bookmark launches it in the Chrome profile it belongs to, every time
+3. **Learns your habits** — frequently opened bookmarks float to the top using exponential decay, so your most-used results are always first
 
 ## Installation
 
@@ -24,6 +29,8 @@ Search all Chrome bookmarks across every profile and open them in the correct pr
 | `Enter` | Open bookmark in its Chrome profile |
 | `⌘` (hold) | Preview the full URL |
 
+Results are sorted by usage frequency — the more you open a bookmark, the higher it ranks. Stale entries fade out automatically over time.
+
 ## How It Works
 
 The workflow reads `~/Library/Application Support/Google/Chrome/Local State` to discover profiles, then scans each profile's `Bookmarks` JSON file. Results are returned as Alfred JSON with profile-specific icons. The selected bookmark is opened via:
@@ -31,6 +38,8 @@ The workflow reads `~/Library/Application Support/Google/Chrome/Local State` to 
 ```bash
 open -na "Google Chrome" --args --profile-directory="<profile>" "<url>"
 ```
+
+Usage tracking is stored in `~/Library/Application Support/Alfred/Workflow Data/com.custom.chrome-bookmarks-search/usage.json`. Counts use exponential decay (factor 0.95) so they stay bounded and stale entries self-prune.
 
 ## Requirements
 
@@ -43,7 +52,8 @@ open -na "Google Chrome" --args --profile-directory="<profile>" "<url>"
 
 | File | Purpose |
 |------|---------|
-| `bookmarks.py` | Script Filter — reads bookmarks, outputs Alfred JSON |
+| `bookmarks.py` | Script Filter — reads bookmarks and usage data, outputs Alfred JSON |
+| `open_bookmark.py` | Run Script — tracks usage and opens URL in the correct profile |
 | `info.plist` | Alfred workflow definition |
 
 ## License
